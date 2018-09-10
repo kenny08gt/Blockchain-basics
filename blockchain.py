@@ -2,7 +2,7 @@
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 # Part 1 Building a blockchain
 
@@ -64,17 +64,37 @@ class Blockchain:
         
 # Part 2 - Mining our blockchain
         
+# Create web app
+app = Flask(__name__)
+# Creating a blockchain
+blockchain = Blockchain()
+
+#Mining a new block
+@app.route('/mine_block', methods=['GET'])
+def mine_block():
+    previous_block = blockchain.get_previous_block()
+    previous_proof = previous_block['proof']
+    proof = blockchain.proof_of_work(previous_proof)
+    previous_hash = blockchain.hash(previous_block)
+    block = blockchain.create_block(proof, previous_hash)
+    response = {'message': 'Congratulations, you just mine a block!',
+                'index': block['index'],
+                'timestamp': block['timestamp'],
+                'proof': block['proof'],
+                'previous_hash': block['previous_hash']}
     
+    return jsonify(response), 200   
     
+# Getting full chain
+@app.route('/get_chain', methods=['GET'])
+def get_chain():
+    response = {'chain': blockchain.chain,
+                'length': len(blockchain.chain)}
     
+    return jsonify(response), 200  
     
-    
-    
-    
-    
-    
-    
-    
+# Running the app
+app.run(host = '0.0.0.0', port = 5000)
     
     
     
